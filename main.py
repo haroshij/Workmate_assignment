@@ -9,15 +9,24 @@ import os
 
 
 class ReportGenerator:
+    """
+    Класс ReportGenerator предназначен для формирвоания отчётов.
+    :parameter:
+        args (list[str]): список с именами файлов для обработки;
+        report_data (list[tuple[str, ...]]): список с готовыми данными отчёта.
+    """
+
     def __init__(self):
+        """
+        Инициализирует объект ReportGenerator.
+        """
         self.args = None
         self.report_data = None
 
-    # В данном методе разбираем аргументы, сохраняем их в атрибуты files и report
-    # Добавлен блок "help", а также дополнительные имена для атрибутов:
-    # -f, --filenames для имён файлов; -r, --report_name для имени файла-отчёта.
-    # Если не передать название файлу-отчёту, то он будет называться performance.
     def parse_arguments(self):
+        """
+        Разбирает аргументы, переданные в терминале.
+        """
         parser = argparse.ArgumentParser()
         parser.add_argument(
             "--files", "-f", "--filenames",
@@ -34,33 +43,35 @@ class ReportGenerator:
         )
         self.args = parser.parse_args()
 
-    # В данном методе формируем данные из файлов в единый файл.
-    # Эти данные можно использовать для различных методов.
-    # Сохраняем данные в файл data_tmp.csv
     def process_files(self):
-        # Проходимся циклом по каждому файлу
-        # и добавляем необходимую нам информацию в файл
+        """
+        Обрабатывает файлы, формируя единый файл, который можно использовать для отчётов.
+        Сохраняет данные во временный файл "data_tmp.csv".
+        :raises:
+            ValueError: если не указано хотя бы одно имя файла
+        """
         if not self.args.files:
-            raise ValueError('Необходимо указать имя(-ена) файла(-ов)')
+            raise ValueError("Необходимо указать имя(-ена) файла(-ов)")
 
-        with open('data_tmp.csv', 'w', newline='') as csvfile:
+        with open("data_tmp.csv", "w", newline="") as csvfile:
             with open(self.args.files[0], encoding="utf-8") as file:
                 fieldnames = next(csv.reader(file))  # считываем названия столбцов из первого файла
-                csv_writer = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
+                csv_writer = csv.DictWriter(csvfile, delimiter=",", fieldnames=fieldnames)
                 csv_writer.writeheader()
             for csv_file in self.args.files:
                 with open(csv_file, encoding="utf-8") as file:
                     csv_reader = csv.DictReader(file)
                     csv_writer.writerows(csv_reader)
 
-    # В данном методе формируем отчёт по эффективности
     def make_a_performance_report(self):
-
+        """
+        Формирует отчёт по эффективности.
+        """
         # Внутри файла проходимся построчно по каждому сотруднику
         # и добавляем необходимую нам информацию в словарь:
         # должность (позицию) и оценку эффективности.
         temp_result = dict()
-        with open('data_tmp.csv', newline='') as csvfile:
+        with open("data_tmp.csv", newline="") as csvfile:
             csv_reader = csv.DictReader(csvfile)
             for row in csv_reader:
                 if row["position"] not in temp_result:
@@ -85,33 +96,36 @@ class ReportGenerator:
             report_data.append({"": n, "position": group[0], "performance": group[1]})
         self.report_data = report_data
 
-    # Данный метод сохраняет отчёт в csv-файл.
     def save_report(self):
+        """
+        Сохраняет отчёт в файл с именем, переданным в переменную report.
+        По умолчанию "performance".
+        """
         with open(self.args.report, "w", encoding="utf-8", newline="") as file:
             fieldnames = list(self.report_data[0].keys())
             csv_writer = csv.DictWriter(file, fieldnames=fieldnames)
             csv_writer.writeheader()
             csv_writer.writerows(self.report_data)
 
-    # Данный метод выводит отчёт на печать.
     def print_report(self):
+        """Выводит отчёт из self.report_data на печать"""
         to_print = tabulate.tabulate(self.report_data, headers="keys", floatfmt=".2f")
         print(to_print)
 
-    # Данный метод удаляет файл с временными данными
     @staticmethod
     def delete_temp_data():
+        """Удаляет файл с временными данными"""
         os.remove("data_tmp.csv")
 
 
 if __name__ == "__main__":
     generator = ReportGenerator()               # Создаём экземпляр Отчётогенератора
     generator.parse_arguments()                 # Парсим аргументы
-    try:
+    try:                                        # Проверяем, указаны ли имена файлов
         generator.process_files()               # Обрабатываем файлы, мёрджим их во временный файл
         generator.make_a_performance_report()   # Делаем отчёт по эффективности
         generator.save_report()                 # Сохраняем отчёт в csv-файле
         generator.print_report()                # Выводим отчёт на экран
         generator.delete_temp_data()            # Удаляем временный файл
-    except ValueError as error:
-        print(error)
+    except ValueError as error:                 # Если не указаны имена файлов,
+        print(error)                            # Выводим сообщение "Необходимо указать имя(-ена) файла(-ов)"
