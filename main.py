@@ -1,9 +1,11 @@
 # Импортируем csv для обработки файлов с оценками эффективности.
 # Импортируем argparse для парсинга аргументов из терминала.
 # Импортируем tabulate для вывода отчёта.
+# Импортируем os для удаления временных данных.
 import csv
 import argparse
 import tabulate
+import os
 
 
 class ReportGenerator:
@@ -38,6 +40,9 @@ class ReportGenerator:
     def process_files(self):
         # Проходимся циклом по каждому файлу
         # и добавляем необходимую нам информацию в файл
+        if not self.args.files:
+            raise ValueError('Необходимо указать имя(-ена) файла(-ов)')
+
         with open('data_tmp.csv', 'w', newline='') as csvfile:
             with open(self.args.files[0], encoding="utf-8") as file:
                 fieldnames = next(csv.reader(file))  # считываем названия столбцов из первого файла
@@ -93,11 +98,20 @@ class ReportGenerator:
         to_print = tabulate.tabulate(self.report_data, headers="keys", floatfmt=".2f")
         print(to_print)
 
+    # Данный метод удаляет файл с временными данными
+    @staticmethod
+    def delete_temp_data():
+        os.remove("data_tmp.csv")
+
 
 if __name__ == "__main__":
-    generator = ReportGenerator()
-    generator.parse_arguments()
-    generator.process_files()
-    generator.make_a_performance_report()
-    generator.save_report()
-    generator.print_report()
+    generator = ReportGenerator()               # Создаём экземпляр Отчётогенератора
+    generator.parse_arguments()                 # Парсим аргументы
+    try:
+        generator.process_files()               # Обрабатываем файлы, мёрджим их во временный файл
+        generator.make_a_performance_report()   # Делаем отчёт по эффективности
+        generator.save_report()                 # Сохраняем отчёт в csv-файле
+        generator.print_report()                # Выводим отчёт на экран
+        generator.delete_temp_data()            # Удаляем временный файл
+    except ValueError as error:
+        print(error)
