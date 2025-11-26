@@ -8,7 +8,7 @@ class ReportGenerator:
     """
     Класс ReportGenerator предназначен для формирования отчётов.
     :parameter:
-        args (list[str]): список с именами файлов для обработки;
+        args (list[str]): список с именами файлов для обработки и именем файла-отчёта;
         report_data (list[tuple[str, ...]]): список с готовыми данными отчёта.
     """
 
