@@ -6,7 +6,7 @@ import os           # Импортируем os для удаления врем
 
 class ReportGenerator:
     """
-    Класс ReportGenerator предназначен для формирвоания отчётов.
+    Класс ReportGenerator предназначен для формирования отчётов.
     :parameter:
         args (list[str]): список с именами файлов для обработки;
         report_data (list[tuple[str, ...]]): список с готовыми данными отчёта.
@@ -47,7 +47,7 @@ class ReportGenerator:
             ValueError: если не указано хотя бы одно имя файла.
         """
         if not self.args.files:
-            raise ValueError("Необходимо указать имя(-ена) файла(-ов)")
+            raise ValueError("Must specify the file name or file names.")
 
         with open("data_tmp.csv", "w", newline="") as csvfile:
             with open(self.args.files[0], encoding="utf-8") as file:
