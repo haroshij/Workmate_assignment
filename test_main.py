@@ -9,7 +9,7 @@ class MockParser:
     Класс предназначен для имитирования аргументов при парсинге.
     :parameter:
         files (list[str]): список с именами файлов для обработки;
-        report (list[tuple[str, ...]]): список с готовыми данными отчёта.
+        report (str): имя файла для отчёта
     """
     def __init__(self, files=None, report='performance'):
         self.files = files
